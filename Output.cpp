@@ -429,12 +429,21 @@ void writeMotors() { // [1000;2000] => [125;250]
       #endif
     #endif
     #if defined(NRF24_RX) // for nRF24L01 receiver, use pin 5 and 6 instead of 10 and 11
-      #ifndef EXT_MOTOR_RANGE 
-        atomicPWM_PIN6_highState = motor[1]>>3;
-        atomicPWM_PIN5_highState = motor[2]>>3;
-      #else
+      #ifdef EXT_MOTOR_RANGE
         atomicPWM_PIN6_highState = (motor[1]>>2) - 250;
         atomicPWM_PIN5_highState = (motor[2]>>2) - 250;
+      #elif defined(EXT_MOTOR_32KHZ)
+        atomicPWM_PIN6_highState = (motor[1] - 1000) >> 2;
+        atomicPWM_PIN5_highState = (motor[2] - 1000) >> 2;
+      #elif defined(EXT_MOTOR_4KHZ)
+        atomicPWM_PIN6_highState = (motor[1] - 1000) << 1;
+        atomicPWM_PIN5_highState = (motor[2] - 1000) << 1;
+      #elif defined(EXT_MOTOR_1KHZ)
+        atomicPWM_PIN6_highState = (motor[1] - 1000) << 3;
+        atomicPWM_PIN5_highState = (motor[2] - 1000) << 3;
+      #else
+        atomicPWM_PIN6_highState = motor[1]>>3;
+        atomicPWM_PIN5_highState = motor[2]>>3;
       #endif
       atomicPWM_PIN6_lowState  = 255-atomicPWM_PIN6_highState;
       atomicPWM_PIN5_lowState  = 255-atomicPWM_PIN5_highState;
