@@ -60,11 +60,11 @@
     //#define MINTHROTTLE 1120 // for Super Simple ESCs 10A
     //#define MINTHROTTLE 1064 // special ESC (simonk)
     //#define MINTHROTTLE 1050 // for brushed ESCs like ladybird
-    #define MINTHROTTLE 1150 // (*) (**)
+    #define MINTHROTTLE 1000 // (*) (**)
 
   /****************************    Motor maxthrottle    *******************************/
     /* this is the maximum value for the ESCs at full power, this value can be increased up to 2000 */
-    #define MAXTHROTTLE 1850
+    #define MAXTHROTTLE 2000
 
   /****************************    Mincommand          *******************************/
     /* this is the value for the ESCs when they are not armed
@@ -163,12 +163,12 @@
     /***************************    independent sensors    ********************************/
       /* leave it commented if you already checked a specific board above */
       /* I2C gyroscope */
-      //#define WMP
+      #define WMP
       //#define ITG3050
       //#define ITG3200
       //#define MPU3050
       //#define L3G4200D
-      #define MPU6050       //combo + ACC
+//      #define MPU6050       //combo + ACC
       //#define LSM330        //combo + ACC
       
       /* I2C accelerometer */
@@ -1007,7 +1007,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
     // for 328p proc
     //#define EXT_MOTOR_32KHZ
     //#define EXT_MOTOR_4KHZ
-    #define EXT_MOTOR_1KHZ
+    //#define EXT_MOTOR_1KHZ
   
     // for 32u4 proc
     //#define EXT_MOTOR_64KHZ
