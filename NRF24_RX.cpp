@@ -44,6 +44,8 @@ void resetRF24AckPayload()
 
 void NRF24_Init() {
 
+  memset(&nrf24_rcData, 0, sizeof(nrf24_rcData));
+
   resetRF24Data();
   resetRF24AckPayload();
 
