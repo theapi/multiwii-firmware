@@ -402,6 +402,9 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
     //#define SUMD PITCH,YAW,THROTTLE,ROLL,AUX1,AUX2,AUX3,AUX4
     //#define RX_SERIAL_PORT 1
 
+/******************************* nRF24L01 ****************************************/
+     #define NRF24_RX
+
 /*************************************************************************************************/
 /*****************                                                                 ***************/
 /****************  SECTION  4 - ALTERNATE CPUs & BOARDS                                    *******/

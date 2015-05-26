@@ -1,0 +1,184 @@
+diff ../multiwii-read-only_r1737/MultiWii_shared/config.h ./config.h
+404a405,407
+>     /******************************* nRF24L01 ****************************************/
+>     //#define NRF24_RX
+> 
+1017c1020
+<     //#define MOTOR_STOP
+---
+>     #define MOTOR_STOP
+1199c1202
+< 
+---
+> 
+diff ../multiwii-read-only_r1737/MultiWii_shared/def.h ./def.h
+1790c1790
+< #if !defined(SERIAL_SUM_PPM) && !defined(SPEKTRUM) && !defined(SBUS) && !defined(SUMD)
+---
+> #if !defined(SERIAL_SUM_PPM) && !defined(SPEKTRUM) && !defined(SBUS) && !defined(SUMD) && !defined(NRF24_RX)
+1997c1997,2006
+< #endif /* DEF_H_ */
+---
+> #ifdef NRF24_RX
+>   #if (!defined(PROMINI))
+>     #error "Currently nRF24 RX is only supported for ATmega328P"
+>   #endif
+>   #if (!defined(QUADX) && !defined(QUADP) && !defined(Y4) && !defined(TRI))
+>     #error "Currently nRF24 RX is only supported for QUADX, QUADP, Y4 or TRI configurations"
+>   #endif
+> #endif
+> 
+> #endif /* DEF_H_ */
+Only in .: maybeOk.txt
+diff ../multiwii-read-only_r1737/MultiWii_shared/MultiWii.cpp ./MultiWii.cpp
+27a28
+> #include "NRF24_RX.h"
+695a697,699
+>   #if defined(NRF24_RX)
+>     NRF24_Init();
+>   #endif
+853c857,860
+< 
+---
+>   #if defined(NRF24_RX)
+> 	NRF24_Read_RC();
+>   #endif
+>   
+Only in ../multiwii-read-only_r1737/MultiWii_shared/: MultiWii.ino
+Only in .: MultiWii_RF24.ino
+Only in .: myOutput.txt
+Only in .: NRF24.diff
+Only in .: NRF24_RX.cpp
+Only in .: NRF24_RX.h
+Only in .: OriginalOutput.txt
+diff ../multiwii-read-only_r1737/MultiWii_shared/Output.cpp ./Output.cpp
+20c20,24
+<   uint8_t PWM_PIN[8] = {9,10,11,3,6,5,A2,12};   //for a quad+: rear,right,left,front
+---
+>   #if defined(NRF24_RX)
+>     uint8_t PWM_PIN[8] = {9,6,5,3,A2,12,10,11};   //use pin 6 and 5 instead of 10 and 11 - only valid for quad!
+>   #else
+>     uint8_t PWM_PIN[8] = {9,10,11,3,6,5,A2,12};   //for a quad+: rear,right,left,front
+>   #endif
+48a53,58
+>   #if defined(NRF24_RX)
+>     volatile uint8_t atomicPWM_PIN5_lowState;
+>     volatile uint8_t atomicPWM_PIN5_highState;
+>     volatile uint8_t atomicPWM_PIN6_lowState;
+>     volatile uint8_t atomicPWM_PIN6_highState;
+>   #endif
+421,429c431,434
+<     #if (NUMBER_MOTOR > 1)
+<       #ifdef EXT_MOTOR_RANGE            // 490Hz
+<         OCR1B = ((motor[1]>>2) - 250);
+<       #elif defined(EXT_MOTOR_32KHZ)
+<         OCR1B = (motor[1] - 1000) >> 2; //  pin 10
+<       #elif defined(EXT_MOTOR_4KHZ)
+<         OCR1B = (motor[1] - 1000) << 1;
+<       #elif defined(EXT_MOTOR_1KHZ)
+<         OCR1B = (motor[1] - 1000) << 3;
+---
+>     #if defined(NRF24_RX) // for nRF24L01 receiver, use pin 5 and 6 instead of 10 and 11
+>       #ifndef EXT_MOTOR_RANGE 
+>         atomicPWM_PIN6_highState = motor[1]>>3;
+>         atomicPWM_PIN5_highState = motor[2]>>3;
+431c436,437
+<         OCR1B = motor[1]>>3; //  pin 10
+---
+>         atomicPWM_PIN6_highState = (motor[1]>>2) - 250;
+>         atomicPWM_PIN5_highState = (motor[2]>>2) - 250;
+433,444c439,466
+<     #endif
+<     #if (NUMBER_MOTOR > 2)
+<       #ifdef EXT_MOTOR_RANGE            // 490Hz
+<         OCR2A = ((motor[2]>>2) - 250);
+<       #elif defined(EXT_MOTOR_32KHZ)
+<         OCR2A = (motor[2] - 1000) >> 2; //  pin 11
+<       #elif defined(EXT_MOTOR_4KHZ)
+<         OCR2A = (motor[2] - 1000) >> 2;
+<       #elif defined(EXT_MOTOR_1KHZ)
+<         OCR2A = (motor[2] - 1000) >> 2;
+<       #else
+<         OCR2A = motor[2]>>3; //  pin 11
+---
+>       atomicPWM_PIN6_lowState  = 255-atomicPWM_PIN6_highState;
+>       atomicPWM_PIN5_lowState  = 255-atomicPWM_PIN5_highState;
+>     #else
+>       #if (NUMBER_MOTOR > 1)
+>         #ifdef EXT_MOTOR_RANGE            // 490Hz
+>           OCR1B = ((motor[1]>>2) - 250);
+>         #elif defined(EXT_MOTOR_32KHZ)
+>           OCR1B = (motor[1] - 1000) >> 2; //  pin 10
+>         #elif defined(EXT_MOTOR_4KHZ)
+>           OCR1B = (motor[1] - 1000) << 1;
+>         #elif defined(EXT_MOTOR_1KHZ)
+>           OCR1B = (motor[1] - 1000) << 3;
+>         #else
+>           OCR1B = motor[1]>>3; //  pin 10
+>         #endif
+>       #endif
+>       #if (NUMBER_MOTOR > 2)
+>         #ifdef EXT_MOTOR_RANGE            // 490Hz
+>           OCR2A = ((motor[2]>>2) - 250);
+>         #elif defined(EXT_MOTOR_32KHZ)
+>           OCR2A = (motor[2] - 1000) >> 2; //  pin 11
+>         #elif defined(EXT_MOTOR_4KHZ)
+>           OCR2A = (motor[2] - 1000) >> 2;
+>         #elif defined(EXT_MOTOR_1KHZ)
+>           OCR2A = (motor[2] - 1000) >> 2;
+>         #else
+>           OCR2A = motor[2]>>3; //  pin 11
+>         #endif
+655,659c677,685
+<     #if (NUMBER_MOTOR > 1)
+<       TCCR1A |= _BV(COM1B1); // connect pin 10 to timer 1 channel B
+<     #endif
+<     #if (NUMBER_MOTOR > 2)
+<       TCCR2A |= _BV(COM2A1); // connect pin 11 to timer 2 channel A
+---
+>     #if defined(NRF24_RX)
+>       initializeSoftPWM(); // use pin 6,5 instead of 10,11 for nRF24L01 receiver
+>     #else
+>       #if (NUMBER_MOTOR > 1)
+>         TCCR1A |= _BV(COM1B1); // connect pin 10 to timer 1 channel B
+>       #endif
+>       #if (NUMBER_MOTOR > 2)
+>         TCCR2A |= _BV(COM2A1); // connect pin 11 to timer 2 channel A
+>       #endif
+979a1006
+> // It will also be used for nRF24L01 receiver (pin 11 is used for SPI so using 6 instead).
+981c1008
+< #if (NUMBER_MOTOR > 4) && (defined(PROMINI) || defined(PROMICRO))
+---
+> #if defined(NRF24_RX) || ((NUMBER_MOTOR > 4) && (defined(PROMINI) || defined(PROMICRO)))
+1003c1030
+<       #if (NUMBER_MOTOR > 4) && !defined(HWPWM6) 
+---
+>       #if defined(NRF24_RX) || ((NUMBER_MOTOR > 4) && !defined(HWPWM6))
+1006c1033
+<       #if (NUMBER_MOTOR > 6) || ((NUMBER_MOTOR == 6) && !defined(SERVO))
+---
+>       #if defined(NRF24_RX) || (NUMBER_MOTOR > 6) || ((NUMBER_MOTOR == 6) && !defined(SERVO))
+1028c1055
+<   #if (NUMBER_MOTOR == 6) && (!defined(SERVO) && !defined(HWPWM6))
+---
+>   #if defined(NRF24_RX) || ((NUMBER_MOTOR == 6) && (!defined(SERVO) && !defined(HWPWM6)))
+1617c1644
+< }
+---
+> }
+Only in .: output.diff
+Only in .: output_git.diff
+diff ../multiwii-read-only_r1737/MultiWii_shared/RX.cpp ./RX.cpp
+8a9
+> #include "NRF24_RX.h"
+447a449,452
+>   #elif defined(NRF24_RX)
+>     if (chan < RC_CHANS) {
+>       data = nrf24_rcData[chan];
+>     } else data = 1500;
+902c907
+< #endif
+---
+> #endif
+Only in .: .svn

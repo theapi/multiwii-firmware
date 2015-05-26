@@ -1793,7 +1793,7 @@
 
 //all new Special RX's must be added here
 //this is to avoid confusion :)
-#if !defined(SERIAL_SUM_PPM) && !defined(SPEKTRUM) && !defined(SBUS) && !defined(SUMD)
+#if !defined(SERIAL_SUM_PPM) && !defined(SPEKTRUM) && !defined(SBUS) && !defined(SUMD) && !defined(NRF24_RX)
   #define STANDARD_RX
 #endif
 
@@ -1998,6 +1998,15 @@
     defined( ITG3200_LPF_256HZ) || defined( ITG3200_LPF_188HZ) || defined( ITG3200_LPF_98HZ) || defined( ITG3200_LPF_42HZ) || \
     defined( ITG3200_LPF_20HZ)  || defined( ITG3200_LPF_10HZ)
   #error "you use one feature that is no longer supported or has undergone a name change"
+#endif
+
+#ifdef NRF24_RX
+  #if (!defined(PROMINI))
+    #error "Currently nRF24 RX is only supported for ATmega328P"
+  #endif
+  #if (!defined(QUADX) && !defined(QUADP) && !defined(Y4) && !defined(TRI))
+    #error "Currently nRF24 RX is only supported for QUADX, QUADP, Y4 or TRI configurations"
+  #endif
 #endif
 
 #endif /* DEF_H_ */

@@ -17,7 +17,11 @@ void initializeServo();
 // since we are uing the PWM generation in a direct way, the pin order is just to inizialie the right pins 
 // its not possible to change a PWM output pin just by changing the order
 #if defined(PROMINI)
-  uint8_t PWM_PIN[8] = {9,10,11,3,6,5,A2,12};   //for a quad+: rear,right,left,front
+  #if defined(NRF24_RX)
+    uint8_t PWM_PIN[8] = {9,6,5,3,A2,12,10,11};   //use pin 6 and 5 instead of 10 and 11 - only valid for quad!
+  #else
+    uint8_t PWM_PIN[8] = {9,10,11,3,6,5,A2,12};   //for a quad+: rear,right,left,front
+  #endif
 #endif
 #if defined(PROMICRO)
   #if !defined(HWPWM6)
@@ -46,6 +50,12 @@ void initializeServo();
 /***************         Software PWM & Servo variables            ********************/
 /**************************************************************************************/
 #if defined(PROMINI) || (defined(PROMICRO) && defined(HWPWM6)) || (defined(MEGA) && defined(MEGA_HW_PWM_SERVOS))
+  #if defined(NRF24_RX)
+    volatile uint8_t atomicPWM_PIN5_lowState;
+    volatile uint8_t atomicPWM_PIN5_highState;
+    volatile uint8_t atomicPWM_PIN6_lowState;
+    volatile uint8_t atomicPWM_PIN6_highState;
+  #endif
   #if (NUMBER_MOTOR > 4)
     //for HEX Y6 and HEX6/HEX6X/HEX6H flat for promini
     volatile uint8_t atomicPWM_PIN5_lowState;
@@ -418,30 +428,42 @@ void writeMotors() { // [1000;2000] => [125;250]
         OCR1A = motor[0]>>3; //  pin 9
       #endif
     #endif
-    #if (NUMBER_MOTOR > 1)
-      #ifdef EXT_MOTOR_RANGE            // 490Hz
-        OCR1B = ((motor[1]>>2) - 250);
-      #elif defined(EXT_MOTOR_32KHZ)
-        OCR1B = (motor[1] - 1000) >> 2; //  pin 10
-      #elif defined(EXT_MOTOR_4KHZ)
-        OCR1B = (motor[1] - 1000) << 1;
-      #elif defined(EXT_MOTOR_1KHZ)
-        OCR1B = (motor[1] - 1000) << 3;
+    #if defined(NRF24_RX) // for nRF24L01 receiver, use pin 5 and 6 instead of 10 and 11
+      #ifndef EXT_MOTOR_RANGE 
+        atomicPWM_PIN6_highState = motor[1]>>3;
+        atomicPWM_PIN5_highState = motor[2]>>3;
       #else
-        OCR1B = motor[1]>>3; //  pin 10
+        atomicPWM_PIN6_highState = (motor[1]>>2) - 250;
+        atomicPWM_PIN5_highState = (motor[2]>>2) - 250;
       #endif
-    #endif
-    #if (NUMBER_MOTOR > 2)
-      #ifdef EXT_MOTOR_RANGE            // 490Hz
-        OCR2A = ((motor[2]>>2) - 250);
-      #elif defined(EXT_MOTOR_32KHZ)
-        OCR2A = (motor[2] - 1000) >> 2; //  pin 11
-      #elif defined(EXT_MOTOR_4KHZ)
-        OCR2A = (motor[2] - 1000) >> 2;
-      #elif defined(EXT_MOTOR_1KHZ)
-        OCR2A = (motor[2] - 1000) >> 2;
-      #else
-        OCR2A = motor[2]>>3; //  pin 11
+      atomicPWM_PIN6_lowState  = 255-atomicPWM_PIN6_highState;
+      atomicPWM_PIN5_lowState  = 255-atomicPWM_PIN5_highState;
+    #else
+      #if (NUMBER_MOTOR > 1)
+        #ifdef EXT_MOTOR_RANGE            // 490Hz
+          OCR1B = ((motor[1]>>2) - 250);
+        #elif defined(EXT_MOTOR_32KHZ)
+          OCR1B = (motor[1] - 1000) >> 2; //  pin 10
+        #elif defined(EXT_MOTOR_4KHZ)
+          OCR1B = (motor[1] - 1000) << 1;
+        #elif defined(EXT_MOTOR_1KHZ)
+          OCR1B = (motor[1] - 1000) << 3;
+        #else
+          OCR1B = motor[1]>>3; //  pin 10
+        #endif
+      #endif
+      #if (NUMBER_MOTOR > 2)
+        #ifdef EXT_MOTOR_RANGE            // 490Hz
+          OCR2A = ((motor[2]>>2) - 250);
+        #elif defined(EXT_MOTOR_32KHZ)
+          OCR2A = (motor[2] - 1000) >> 2; //  pin 11
+        #elif defined(EXT_MOTOR_4KHZ)
+          OCR2A = (motor[2] - 1000) >> 2;
+        #elif defined(EXT_MOTOR_1KHZ)
+          OCR2A = (motor[2] - 1000) >> 2;
+        #else
+          OCR2A = motor[2]>>3; //  pin 11
+        #endif
       #endif
     #endif
     #if (NUMBER_MOTOR > 3)
@@ -652,11 +674,15 @@ void initOutput() {
     #if (NUMBER_MOTOR > 0)
       TCCR1A |= _BV(COM1A1); // connect pin 9 to timer 1 channel A
     #endif
-    #if (NUMBER_MOTOR > 1)
-      TCCR1A |= _BV(COM1B1); // connect pin 10 to timer 1 channel B
-    #endif
-    #if (NUMBER_MOTOR > 2)
-      TCCR2A |= _BV(COM2A1); // connect pin 11 to timer 2 channel A
+    #if defined(NRF24_RX)
+      initializeSoftPWM(); // use pin 6,5 instead of 10,11 for nRF24L01 receiver
+    #else
+      #if (NUMBER_MOTOR > 1)
+        TCCR1A |= _BV(COM1B1); // connect pin 10 to timer 1 channel B
+      #endif
+      #if (NUMBER_MOTOR > 2)
+        TCCR2A |= _BV(COM2A1); // connect pin 11 to timer 2 channel A
+      #endif
     #endif
     #if (NUMBER_MOTOR > 3)
       TCCR2A |= _BV(COM2B1); // connect pin 3 to timer 2 channel B
@@ -977,8 +1003,9 @@ void initializeServo() {
 /************             Motor software PWM generation              ******************/
 /**************************************************************************************/
 // SW PWM is only used if there are not enough HW PWM pins (for exampe hexa on a promini)
+// It will also be used for nRF24L01 receiver (pin 11 is used for SPI so using 6 instead).
 
-#if (NUMBER_MOTOR > 4) && (defined(PROMINI) || defined(PROMICRO))
+#if defined(NRF24_RX) || ((NUMBER_MOTOR > 4) && (defined(PROMINI) || defined(PROMICRO)))
 
   /****************    Pre define the used ISR's and Timerchannels     ******************/
   #if !defined(PROMICRO)
@@ -1000,10 +1027,10 @@ void initializeServo() {
   void initializeSoftPWM(void) {
     #if !defined(PROMICRO)
       TCCR0A = 0; // normal counting mode
-      #if (NUMBER_MOTOR > 4) && !defined(HWPWM6) 
+      #if defined(NRF24_RX) || ((NUMBER_MOTOR > 4) && !defined(HWPWM6))
         TIMSK0 |= (1<<OCIE0B); // Enable CTC interrupt  
       #endif
-      #if (NUMBER_MOTOR > 6) || ((NUMBER_MOTOR == 6) && !defined(SERVO))
+      #if defined(NRF24_RX) || (NUMBER_MOTOR > 6) || ((NUMBER_MOTOR == 6) && !defined(SERVO))
         TIMSK0 |= (1<<OCIE0A);
       #endif
     #else
@@ -1025,7 +1052,7 @@ void initializeServo() {
   /****************               Motor SW PWM ISR's                 ******************/
   // hexa with old but sometimes better SW PWM method
   // for setups without servos
-  #if (NUMBER_MOTOR == 6) && (!defined(SERVO) && !defined(HWPWM6))
+  #if defined(NRF24_RX) || ((NUMBER_MOTOR == 6) && (!defined(SERVO) && !defined(HWPWM6)))
     ISR(SOFT_PWM_ISR1) { 
       static uint8_t state = 0;
       if(state == 0){
