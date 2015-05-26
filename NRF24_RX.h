@@ -1,6 +1,6 @@
 
 /*
-Tested with 16MHz pro-mini, QuadX and https://github.com/gcopeland/RF24
+Tested with 16MHz pro-mini, 
 Motors use pins 9,6,5,3 instead of 9,10,11,3
 nRF24 connections (left is nRF24, right is arduino):q
   CE      7
@@ -20,23 +20,16 @@ You can change CE and CSN in NRF24_RC.cpp
 
 // The sizeof this struct should not exceed 32 bytes
 struct RF24Data {
-  byte throttle;
-  byte yaw;
-  byte pitch;
-  byte roll;
-  byte dial1;
-  byte dial2;
-  byte switches;
+  int throttle;
+  int yaw;
+  int pitch;
+  int roll;
+  byte switches; // bitflag
 };
 
 struct RF24AckPayload {
-  float lat;
-  float lon;
-  int16_t heading;
-  int16_t pitch;
-  int16_t roll;  
-  int32_t alt;
-  byte flags;
+  uint8_t key;
+  uint16_t val;
 };
 
 extern RF24Data nrf24Data;
