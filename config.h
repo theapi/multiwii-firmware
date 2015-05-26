@@ -999,7 +999,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
   /**************************************************************************************/
   /********   special ESC with extended range [0-2000] microseconds  ********************/
   /**************************************************************************************/
-    //#define EXT_MOTOR_RANGE // using this with wii-esc requires to change MINCOMMAND to 1008 for promini and mega
+    #define EXT_MOTOR_RANGE // using this with wii-esc requires to change MINCOMMAND to 1008 for promini and mega
 
   /**************************************************************************************/
   /********  brushed ESC ****************************************************************/
@@ -1007,7 +1007,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
     // for 328p proc
     //#define EXT_MOTOR_32KHZ
     //#define EXT_MOTOR_4KHZ
-    //#define EXT_MOTOR_1KHZ
+    #define EXT_MOTOR_1KHZ
   
     // for 32u4 proc
     //#define EXT_MOTOR_64KHZ
