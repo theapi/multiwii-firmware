@@ -439,8 +439,10 @@ void writeMotors() { // [1000;2000] => [125;250]
         atomicPWM_PIN6_highState = (motor[1] - 1000) << 1;
         atomicPWM_PIN5_highState = (motor[2] - 1000) << 1;
       #elif defined(EXT_MOTOR_1KHZ)
-        atomicPWM_PIN6_highState = (motor[1] - 1000) << 3;
-        atomicPWM_PIN5_highState = (motor[2] - 1000) << 3;
+        //atomicPWM_PIN6_highState = (motor[1] - 1000) << 3;
+        //atomicPWM_PIN5_highState = (motor[2] - 1000) << 3;
+        analogWrite(5, (motor[1] - 1000) >> 2);
+        analogWrite(6, (motor[2] - 1000) >> 2);
       #else
         atomicPWM_PIN6_highState = motor[1]>>3;
         atomicPWM_PIN5_highState = motor[2]>>3;
@@ -683,7 +685,7 @@ void initOutput() {
     #if (NUMBER_MOTOR > 0)
       TCCR1A |= _BV(COM1A1); // connect pin 9 to timer 1 channel A
     #endif
-    #if defined(NRF24_RX)
+    #if defined(NRF24_RX) && !defined(EXT_MOTOR_1KHZ)
       initializeSoftPWM(); // use pin 6,5 instead of 10,11 for nRF24L01 receiver
     #else
       #if (NUMBER_MOTOR > 1)
@@ -1014,7 +1016,7 @@ void initializeServo() {
 // SW PWM is only used if there are not enough HW PWM pins (for exampe hexa on a promini)
 // It will also be used for nRF24L01 receiver (pin 11 is used for SPI so using 6 instead).
 
-#if defined(NRF24_RX) || ((NUMBER_MOTOR > 4) && (defined(PROMINI) || defined(PROMICRO)))
+#if (defined(NRF24_RX) && !defined(EXT_MOTOR_1KHZ)) || ((NUMBER_MOTOR > 4) && (defined(PROMINI) || defined(PROMICRO)))
 
   /****************    Pre define the used ISR's and Timerchannels     ******************/
   #if !defined(PROMICRO)

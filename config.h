@@ -1007,7 +1007,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
     // for 328p proc
     //#define EXT_MOTOR_32KHZ
     //#define EXT_MOTOR_4KHZ
-    //#define EXT_MOTOR_1KHZ
+    #define EXT_MOTOR_1KHZ
   
     // for 32u4 proc
     //#define EXT_MOTOR_64KHZ
