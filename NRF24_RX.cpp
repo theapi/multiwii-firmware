@@ -130,6 +130,9 @@ void NRF24_Read_RC() {
   nrf24_rcData[YAW] =      nrf24Data.yaw;
   nrf24_rcData[PITCH] =    nrf24Data.pitch;
   nrf24_rcData[ROLL] =     nrf24Data.roll;
+  
+  debug[0]= nrf24_rcData[THROTTLE];
+  debug[1]= nrf24_rcData[YAW];
 }
 
 #endif

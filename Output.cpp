@@ -428,7 +428,7 @@ void writeMotors() { // [1000;2000] => [125;250]
         OCR1A = motor[0]>>3; //  pin 9
       #endif
     #endif
-    #if defined(NRF24_RX) // for nRF24L01 receiver, use pin 5 and 6 instead of 10 and 11
+    #if (defined(NRF24_RX) && !defined(EXT_MOTOR_1KHZ)) // for nRF24L01 receiver, use pin 5 and 6 instead of 10 and 11
       #ifdef EXT_MOTOR_RANGE
         atomicPWM_PIN6_highState = (motor[1]>>2) - 250;
         atomicPWM_PIN5_highState = (motor[2]>>2) - 250;
@@ -441,8 +441,6 @@ void writeMotors() { // [1000;2000] => [125;250]
       #elif defined(EXT_MOTOR_1KHZ)
         //atomicPWM_PIN6_highState = (motor[1] - 1000) << 3;
         //atomicPWM_PIN5_highState = (motor[2] - 1000) << 3;
-        analogWrite(5, (motor[1] - 1000) >> 2);
-        analogWrite(6, (motor[2] - 1000) >> 2);
       #else
         atomicPWM_PIN6_highState = motor[1]>>3;
         atomicPWM_PIN5_highState = motor[2]>>3;
@@ -458,8 +456,14 @@ void writeMotors() { // [1000;2000] => [125;250]
         #elif defined(EXT_MOTOR_4KHZ)
           OCR1B = (motor[1] - 1000) << 1;
         #elif defined(EXT_MOTOR_1KHZ)
-          OCR1B = (motor[1] - 1000) << 3;
+          #if (defined(NRF24_RX))
+            debug[2]= (motor[1] - 1000) >> 2;
+            analogWrite(5, (motor[1] - 1000) >> 2); // pin 5
+          #else
+            OCR1B = (motor[1] - 1000) << 3;
+          #endif
         #else
+        debug[3]= (motor[1] - 1000) >> 2;
           OCR1B = motor[1]>>3; //  pin 10
         #endif
       #endif
@@ -471,7 +475,12 @@ void writeMotors() { // [1000;2000] => [125;250]
         #elif defined(EXT_MOTOR_4KHZ)
           OCR2A = (motor[2] - 1000) >> 2;
         #elif defined(EXT_MOTOR_1KHZ)
-          OCR2A = (motor[2] - 1000) >> 2;
+          #if (defined(NRF24_RX))
+            debug[3]= (motor[2] - 1000) >> 2;
+            analogWrite(6, (motor[2] - 1000) >> 2); // pin 6
+          #else
+            OCR1B = (motor[2] - 1000) << 3;
+          #endif
         #else
           OCR2A = motor[2]>>3; //  pin 11
         #endif
@@ -689,10 +698,12 @@ void initOutput() {
       initializeSoftPWM(); // use pin 6,5 instead of 10,11 for nRF24L01 receiver
     #else
       #if (NUMBER_MOTOR > 1)
-        TCCR1A |= _BV(COM1B1); // connect pin 10 to timer 1 channel B
+        //TCCR1A |= _BV(COM1B1); // connect pin 10 to timer 1 channel B
+        pinMode(5,OUTPUT);
       #endif
       #if (NUMBER_MOTOR > 2)
-        TCCR2A |= _BV(COM2A1); // connect pin 11 to timer 2 channel A
+        //TCCR2A |= _BV(COM2A1); // connect pin 11 to timer 2 channel A
+        pinMode(6,OUTPUT);
       #endif
     #endif
     #if (NUMBER_MOTOR > 3)
