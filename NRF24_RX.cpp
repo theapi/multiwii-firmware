@@ -39,7 +39,7 @@ void resetRF24Data()
 void resetRF24AckPayload()
 {
   nrf24AckPayload.key = 0;
-  nrf24AckPayload.val = 0;
+  nrf24AckPayload.val = analog.vbat;
 }
 
 void NRF24_Init() {
@@ -71,11 +71,10 @@ void NRF24_Init() {
 }
 
 void NRF24_Read_RC() {
-  static byte ack_key = 0;
   static unsigned long lastRecvTime = 0;
 
-  nrf24AckPayload.key = 0;
-  nrf24AckPayload.val = analog.vbat; // vcc
+  //nrf24AckPayload.key = 0;
+  //nrf24AckPayload.val = analog.vbat; // vcc
 
   /*
   nrf24AckPayload.heading = att.heading;
@@ -89,9 +88,12 @@ void NRF24_Read_RC() {
   while ( radio.available() ) {
     radio.read(&nrf24Data, sizeof(RF24Data));
     lastRecvTime = now;
+    
+    if (++nrf24AckPayload.key > 4) {
+      nrf24AckPayload.key = 0; 
+    }
 
-    nrf24AckPayload.key = ack_key;
-    switch (ack_key) {
+    switch (nrf24AckPayload.key) {
       case 0:
         nrf24AckPayload.val = analog.vbat; // vcc 
         break;
@@ -105,14 +107,11 @@ void NRF24_Read_RC() {
         nrf24AckPayload.val = att.angle[ROLL]; 
         break;
       case 4:
+        //nrf24AckPayload.val = analog.vbat;
         memcpy(&nrf24AckPayload.val, &f, 1); // first byte of status flags 
         break;
     }  
-      
-    if (++ack_key > 4) {
-      ack_key = 0; 
-    }
-    
+
     radio.writeAckPayload(1, &nrf24AckPayload, sizeof(RF24AckPayload) ); 
   }
   if ( now - lastRecvTime > 1000 ) {
