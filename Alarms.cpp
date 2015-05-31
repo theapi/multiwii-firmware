@@ -529,6 +529,13 @@ void blinkLED(uint8_t num, uint8_t ontime,uint8_t repeat) {
   void led_flasher_autoselect_sequence() {
     if (led_flasher_control != LED_FLASHER_AUTO) return;
 
+    #if defined(VBAT)
+    if (analog.vbat < conf.vbatlevel_crit) {
+      led_flasher_set_sequence(LED_FLASHER_SEQUENCE_LOW);
+      return;
+    }
+    #endif
+
     #if defined(LED_FLASHER_SEQUENCE_MAX)
     /* do we want the complete illumination no questions asked? */
     if (rcOptions[BOXLEDMAX]) {
