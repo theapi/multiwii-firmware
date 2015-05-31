@@ -368,6 +368,35 @@ uint8_t alarmArray[ALRM_FAC_SIZE];           // array
   int32_t baroPressureSum;
 #endif
 
+void batterySetup()
+{
+  // Read 1.1V reference against AVcc
+  // set the reference to Vcc and the measurement to the internal 1.1V reference
+  #if defined(__AVR_ATmega32U4__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+    ADMUX = _BV(REFS0) | _BV(MUX4) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+  #elif defined (__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__)
+    ADMUX = _BV(MUX5) | _BV(MUX0);
+  #elif defined (__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+    ADMUX = _BV(MUX3) | _BV(MUX2);
+  #else
+    ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+  #endif  
+}
+
+long batteryVcc() {
+
+  ADCSRA |= _BV(ADSC); // Start conversion
+  while (bit_is_set(ADCSRA,ADSC)); // measuring
+ 
+  uint8_t low  = ADCL; // must read ADCL first - it then locks ADCH  
+  uint8_t high = ADCH; // unlocks both
+ 
+  long result = (high<<8) | low;
+ 
+  result = 1125300L / result; // Calculate Vcc (in mV); 1125300 = 1.1*1023*1000
+  return result; // Vcc in millivolts
+}
+
 void annexCode() { // this code is excetuted at each loop and won't interfere with control loop if it lasts less than 650 microseconds
   static uint32_t calibratedAccTime;
   uint16_t tmp,tmp2;
@@ -453,20 +482,28 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
     #if defined(VBAT) && !defined(VBAT_CELLS)
       static uint8_t ind = 0;
       static uint16_t vvec[VBAT_SMOOTH], vsum;
-      uint16_t v = analogRead(V_BATPIN); debug[0]= v;
-      #if VBAT_SMOOTH == 1
-        analog.vbat = (v*VBAT_PRESCALER) / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+
+      #if (defined(VBAT_INTERNAL)) 
+        uint16_t v = batteryVcc(); debug[0]= v;
+        // Running average
+        vsum = vsum * 0.9 + v * 0.1;
+        analog.vbat = vsum/100;
       #else
-        vsum += v;
-        vsum -= vvec[ind];
-        vvec[ind++] = v;
-        ind %= VBAT_SMOOTH;
-        #if VBAT_SMOOTH == VBAT_PRESCALER
-          analog.vbat = vsum / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
-        #elif VBAT_SMOOTH < VBAT_PRESCALER
-          analog.vbat = (vsum * (VBAT_PRESCALER/VBAT_SMOOTH)) / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+        uint16_t v = analogRead(V_BATPIN);
+        #if VBAT_SMOOTH == 1
+          analog.vbat = (v*VBAT_PRESCALER) / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
         #else
-          analog.vbat = ((vsum /VBAT_SMOOTH) * VBAT_PRESCALER) / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+          vsum += v;
+          vsum -= vvec[ind];
+          vvec[ind++] = v;
+          ind %= VBAT_SMOOTH;
+          #if VBAT_SMOOTH == VBAT_PRESCALER
+            analog.vbat = vsum / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+          #elif VBAT_SMOOTH < VBAT_PRESCALER
+            analog.vbat = (vsum * (VBAT_PRESCALER/VBAT_SMOOTH)) / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+          #else
+            analog.vbat = ((vsum /VBAT_SMOOTH) * VBAT_PRESCALER) / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+          #endif
         #endif
       #endif
     #endif // VBAT
@@ -642,6 +679,7 @@ void setup() {
   BUZZERPIN_PINMODE;
   STABLEPIN_PINMODE;
   POWERPIN_OFF;
+  batterySetup();
   initOutput();
   readGlobalSet();
   #ifndef NO_FLASH_CHECK

@@ -903,6 +903,11 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
     #define NO_VBAT          16 // Avoid beeping without any battery
     #define VBAT_OFFSET       0 // offset in 0.1Volts, gets added to voltage value  - useful for zener diodes
 
+    /*
+     * Use the internal band gap to read vcc powered without a regulator (1 cell lipo)
+     */
+    #define VBAT_INTERNAL 1 
+    
     /* for V BAT monitoring of individual cells
      * enable both VBAT and VBAT_CELLS
      */
@@ -1156,7 +1161,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
     #define LCD_TELEMETRY_FREQ 23       // to send telemetry data over serial 23 <=> 60ms <=> 16Hz (only sending interlaced, so 8Hz update rate)
     #define LCD_TELEMETRY_AUTO_FREQ  967// to step to next telemetry page 967 <=> 3s
     #define PSENSOR_SMOOTH 16           // len of averaging vector for smoothing the PSENSOR readings; should be power of 2; set to 1 to disable
-    #define VBAT_SMOOTH 16              // len of averaging vector for smoothing the VBAT readings; should be power of 2; set to 1 to disable
+    #define VBAT_SMOOTH 1              // len of averaging vector for smoothing the VBAT readings; should be power of 2; set to 1 to disable
     #define RSSI_SMOOTH 16              // len of averaging vector for smoothing the RSSI readings; should be power of 2; set to 1 to disable
 
   /********************************************************************/
