@@ -453,7 +453,7 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
     #if defined(VBAT) && !defined(VBAT_CELLS)
       static uint8_t ind = 0;
       static uint16_t vvec[VBAT_SMOOTH], vsum;
-      uint16_t v = analogRead(V_BATPIN);
+      uint16_t v = analogRead(V_BATPIN); debug[0]= v;
       #if VBAT_SMOOTH == 1
         analog.vbat = (v*VBAT_PRESCALER) / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
       #else
@@ -470,6 +470,7 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
         #endif
       #endif
     #endif // VBAT
+    
     break;
   }
   case 2:

@@ -881,7 +881,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
   /********************************************************************/
   /****                             Buzzer                         ****/
   /********************************************************************/
-    //#define BUZZER
+    #define BUZZER
     //#define RCOPTIONSBEEP         // uncomment this if you want the buzzer to beep at any rcOptions change on channel Aux1 to Aux4
     //#define ARMEDTIMEWARNING 330  // (*) Trigger an alarm after a certain time of being armed [s] to save you lipo (if your TX does not have a countdown)
     //#define PILOTLAMP             //Uncomment if you are using a X-Arcraft Pilot Lamp
@@ -894,12 +894,12 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
        with R1=33k and R2=51k
        vbat = [0;1023]*16/VBATSCALE
        must be associated with #define BUZZER ! */
-    //#define VBAT              // uncomment this line to activate the vbat code
-    #define VBATSCALE       131 // (*) (**) change this value if readed Battery voltage is different than real voltage
-    #define VBATNOMINAL     126 // 12,6V full battery nominal voltage - only used for lcd.telemetry
-    #define VBATLEVEL_WARN1 107 // (*) (**) 10,7V
-    #define VBATLEVEL_WARN2  99 // (*) (**) 9.9V
-    #define VBATLEVEL_CRIT   93 // (*) (**) 9.3V - critical condition: if vbat ever goes below this value, permanent alarm is triggered
+    #define VBAT              // uncomment this line to activate the vbat code
+    #define VBATSCALE       195 // (*) (**) change this value if readed Battery voltage is different than real voltage
+    #define VBATNOMINAL     38 // 12,6V full battery nominal voltage - only used for lcd.telemetry
+    #define VBATLEVEL_WARN1 34 // (*) (**) 10,7V
+    #define VBATLEVEL_WARN2  32 // (*) (**) 9.9V
+    #define VBATLEVEL_CRIT   30 // (*) (**) 9.3V - critical condition: if vbat ever goes below this value, permanent alarm is triggered
     #define NO_VBAT          16 // Avoid beeping without any battery
     #define VBAT_OFFSET       0 // offset in 0.1Volts, gets added to voltage value  - useful for zener diodes
 
@@ -994,7 +994,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 /*****************                                                                 ***************/
 /*************************************************************************************************/
 
-  #define VBAT_PRESCALER 16 // set this to 8 if vbatscale would exceed 255
+  #define VBAT_PRESCALER 8 // set this to 8 if vbatscale would exceed 255
 
   /**************************************************************************************/
   /********   special ESC with extended range [0-2000] microseconds  ********************/
