@@ -76,7 +76,8 @@ void NRF24_Read_RC() {
   static unsigned long lastRecvTime = 0;
 
   nrf24AckPayload.key = 0;
-  nrf24AckPayload.val = 0;
+  nrf24AckPayload.val = analog.vbat; // vcc
+  debug[1]= analog.vbat;
   /*
   nrf24AckPayload.heading = att.heading;
   nrf24AckPayload.pitch = att.angle[PITCH];
@@ -87,20 +88,23 @@ void NRF24_Read_RC() {
   
   if (!ack_ready) {
     // Create the ack payload read for the next transmission response
-    radio.writeAckPayload(1, &nrf24AckPayload, sizeof(RF24AckPayload) ); 
-    ack_ready = 1;
+    //radio.writeAckPayload(1, &nrf24AckPayload, sizeof(RF24AckPayload) ); 
+    //ack_ready = 1;
   }
 
   unsigned long now = millis();
   while ( radio.available() ) {
     radio.read(&nrf24Data, sizeof(RF24Data));
     lastRecvTime = now;
-    ack_ready = 0;
-    nrf24AckPayload.key = ack_key;
+    //ack_ready = 0;
+    //ack_key = 0; // FORCE for now
+    //nrf24AckPayload.key = ack_key;
+    //nrf24AckPayload.val = analog.vbat; // vcc
     
+    /*
     switch (ack_key) {
       case 0:
-        nrf24AckPayload.val = 3333; //@todo vcc 
+        nrf24AckPayload.val = analog.vbat; // vcc 
         break;
       case 1:
         nrf24AckPayload.val = nrf24Data.throttle; 
@@ -119,7 +123,9 @@ void NRF24_Read_RC() {
     if (++ack_key > 4) {
       ack_key = 0; 
     }
-    
+    */
+
+    radio.writeAckPayload(1, &nrf24AckPayload, sizeof(RF24AckPayload) ); 
   }
   if ( now - lastRecvTime > 1000 ) {
     // signal lost?
