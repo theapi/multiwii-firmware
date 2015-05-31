@@ -368,6 +368,7 @@ uint8_t alarmArray[ALRM_FAC_SIZE];           // array
   int32_t baroPressureSum;
 #endif
 
+#if (defined(VBAT_INTERNAL)) 
 void batterySetup()
 {
   // Read 1.1V reference against AVcc
@@ -396,6 +397,7 @@ long batteryVcc() {
   result = 1125300L / result; // Calculate Vcc (in mV); 1125300 = 1.1*1023*1000
   return result; // Vcc in millivolts
 }
+#endif
 
 void annexCode() { // this code is excetuted at each loop and won't interfere with control loop if it lasts less than 650 microseconds
   static uint32_t calibratedAccTime;
@@ -679,7 +681,9 @@ void setup() {
   BUZZERPIN_PINMODE;
   STABLEPIN_PINMODE;
   POWERPIN_OFF;
-  batterySetup();
+  #if (defined(VBAT_INTERNAL)) 
+    batterySetup();
+  #endif
   initOutput();
   readGlobalSet();
   #ifndef NO_FLASH_CHECK
