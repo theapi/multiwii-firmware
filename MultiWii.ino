@@ -11,6 +11,28 @@
  * Have fun, and do not forget MultiWii is made possible and brought to you under the GPL License.
  *
  */
+ 
+/*
+ *
+ * PIN USAGE:
+ * 
+ * 4  - Lights
+ * 
+ * 3  - motor[3]
+ * 5  - motor[1]
+ * 6  - motor[2]
+ * 9  - motor[0]
+ * 
+ * 7  - NRF CE (3)
+ * 8  - NRF CSN (4)
+ * 11 - NRF MOSI (6)
+ * 12 - NRF MISO (7)
+ * 13 - NRF SCK (5)
+ * 
+ * A4 - SDA -> accelerometer
+ * A5 - SCL -> accelerometer
+ * 
+ */
 
 #include <SPI.h>
 #include <nRF24L01.h>
