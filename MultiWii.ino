@@ -18,10 +18,10 @@
  * 
  * 4  - Lights
  * 
- * 3  - motor[3]
- * 5  - motor[1]
- * 6  - motor[2]
- * 9  - motor[0]
+ * 3  - motor[3] Front left
+ * 5  - motor[1] Front right (was 10)
+ * 6  - motor[2] Rear left (was 11)
+ * 9  - motor[0] Rear right
  * 
  * 7  - NRF CE (3)
  * 8  - NRF CSN (4)
