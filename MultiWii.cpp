@@ -796,8 +796,6 @@ void setup() {
   #ifdef DEBUGMSG
     debugmsg_append_str("initialization completed\n");
   #endif
-  
-  f.ARMED = 1;
 }
 
 void go_arm() {
