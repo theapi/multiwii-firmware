@@ -294,7 +294,7 @@ void ACC_Common() {
   #endif
   imu.accADC[ROLL]  -=  global_conf.accZero[ROLL] ;
   imu.accADC[PITCH] -=  global_conf.accZero[PITCH];
-  imu.accADC[YAW]   -=  global_conf.accZero[YAW] ;
+  imu.accADC[YAW]   -=  global_conf.accZero[YAW];
 
   #if defined(SENSORS_TILT_45DEG_LEFT)
     int16_t temp = ((imu.accADC[PITCH] - imu.accADC[ROLL] )*7)/10;

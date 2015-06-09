@@ -86,9 +86,8 @@ void NRF24_Read_RC() {
 
   unsigned long now = millis();
   while ( radio.available() ) {
-    radio.read(&nrf24Data, sizeof(RF24Data));
-    lastRecvTime = now;
-    
+ 
+/*   
     if (++nrf24AckPayload.key > 4) {
       nrf24AckPayload.key = 0; 
     }
@@ -107,13 +106,20 @@ void NRF24_Read_RC() {
         nrf24AckPayload.val = att.angle[ROLL]; 
         break;
       case 4:
-        //nrf24AckPayload.val = analog.vbat;
-        memcpy(&nrf24AckPayload.val, &f, 1); // first byte of status flags 
+        nrf24AckPayload.val = analog.vbat;
+        //memcpy(&nrf24AckPayload.val, &f, 1); // first byte of status flags 
         break;
     }  
-
+*/
+    // @todo why is att.angle[ROLL] negative?
+    nrf24AckPayload.key = 0;
+    nrf24AckPayload.val = analog.vbat;
     radio.writeAckPayload(1, &nrf24AckPayload, sizeof(RF24AckPayload) ); 
+    
+    radio.read(&nrf24Data, sizeof(RF24Data));
+    lastRecvTime = now;
   }
+  
   if ( now - lastRecvTime > 1000 ) {
     // signal lost?
     resetRF24Data();
@@ -125,7 +131,8 @@ void NRF24_Read_RC() {
   nrf24_rcData[ROLL] =     nrf24Data.roll;
   
   //debug[0]= nrf24_rcData[THROTTLE];
-  //debug[1]= nrf24_rcData[YAW];
+  
+  //debug[1]= att.angle[ROLL];
 }
 
 #endif
