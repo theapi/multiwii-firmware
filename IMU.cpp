@@ -184,10 +184,10 @@ void rotateV32( t_int32_t_vector *v,int16_t* delta) {
 
   // HACK
   // stop the constant slight yaw to the left.
-  if (delta[YAW] >= -4 && delta[YAW] < 0) {
+  if (delta[YAW] > -6 && delta[YAW] < 16) {
   delta[YAW] = 0;
   }
-  debug[1]= delta[YAW];
+  //debug[1]= delta[YAW];
   // END HACK
 
   v->V32.Z -=  mul(delta[ROLL]  ,  X)  + mul(delta[PITCH] , Y);
